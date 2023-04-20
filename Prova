@@ -1,0 +1,10 @@
+js = "Olá João S. me chamo Spsf (Soluções para suas finanças) e irei lhe ajudar a controlar suas finanças"
+print (js)
+
+
+redliq = float(input ("Insira seu rendimento liquido mensal: "))
+mes_ano = input ("Informe o mes e o ano em MM/AAAA: ")
+
+with open ("Redliquido.txt", "a") as arquivo:
+    arquivo.write (f"{mes_ano}: rendimento liquido = R${redliq: .2f} \n")
+    
