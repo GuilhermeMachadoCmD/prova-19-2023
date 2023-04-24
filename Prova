@@ -1,10 +1,513 @@
-js = "Olá João S. me chamo Spsf (Soluções para suas finanças) e irei lhe ajudar a controlar suas finanças"
-print (js)
+import datetime
+import os 
+
+rendimento_mensal = None
+meta_poupanca = None
+saldo_atual = None
+despesas = []
 
 
-redliq = float(input ("Insira seu rendimento liquido mensal: "))
-mes_ano = input ("Informe o mes e o ano em MM/AAAA: ")
+def adicionar_despesa(valor, descricao):
+    despesas.append({"valor": valor, "descricao": descricao})
 
-with open ("Redliquido.txt", "a") as arquivo:
-    arquivo.write (f"{mes_ano}: rendimento liquido = R${redliq: .2f} \n")
+def calcular_saldo():
+    global saldo_atual
+    for despesa in despesas:
+        saldo_atual -= despesa["valor"]
+
+def calcular_poupanca():
+    poupanca_atual = 0.0
+    for despesa in despesas:
+        poupanca_atual += despesa["valor"]
+    poupanca_faltante = meta_poupanca - poupanca_atual
+    if poupanca_faltante > 0:
+        return poupanca_faltante
+    else:
+        return 0.0
+
+def calcular_rendimento():
+    poupanca_atual = calcular_poupanca()
+    rendimento = poupanca_atual * 0.01
+    return rendimento
+
+def salvar_rendimento():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    with open(f"rendimentos_{mes}.txt", "w") as arquivo:
+        arquivo.write(f"Rendimento líquido do mês {mes}: R$ {rendimento_mensal:.2f}\n")
+
+
+opcao = 0
+while opcao != 6:
+    print("Menu:")
+    print("1. Adicionar uma despesa")
+    print("2. Verificar o saldo atual")
+    print("3. Verificar o quanto já foi poupado para atingir a meta")
+    print("4. Verificar o rendimento do investimento")
+    print("5. Informar o rendimento líquido mensal")
+    print("6. Sair do programa")
+
+    try:
+        opcao = int(input("Digite a opção desejada: "))
+
+        if opcao == 1:
+            valor = float(input("Digite o valor da despesa: "))
+            descricao = input("Digite a descrição da despesa: ")
+            adicionar_despesa(valor, descricao)
+            print("Despesa adicionada com sucesso!")
+
+        elif opcao == 2:
+            calcular_saldo()
+            print("Seu saldo atual é de R$ {:.2f}".format(saldo_atual))
+
+        elif opcao == 3:
+            poupanca_faltante = calcular_poupanca()
+            if poupanca_faltante > 0:
+                print("Você ainda precisa poupar R$ {:.2f} para atingir sua meta de poupança".format(poupanca_faltante))
+            else:
+                print("Você atingiu sua meta de poupança!")
+
+        elif opcao == 4:
+            rendimento = calcular_rendimento()
+            print("Seu rendimento mensal atual é de R$ {:.2f}".format(rendimento))
+
+        elif opcao == 5:
+            rendimento_mensal = float(input("Informe o rendimento líquido mensal: "))
+            salvar_rendimento()
+            print("Rendimento salvo com sucesso!")
+
+        elif opcao == 6:
+            print("Saindo do programa...")
+
+        else:
+            print("Opção inválida. Digite um número entre 1 e 6.")
+
+    except ValueError:
+        print("Opção inválida. Digite um número válido.")
+
+
+def alterar_rendimento():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"rendimentos_{mes}.txt"
     
+    try:
+        with open(arquivo, "r") as f:
+            linhas = f.readlines()
+            rendimento_atual = float(linhas[0].split("R$ ")[1].strip())
+    except FileNotFoundError:
+        print("Não há rendimentos salvos para este mês.")
+        return
+
+    novo_rendimento = float(input(f"O rendimento atual é de R$ {rendimento_atual:.2f}. Digite o novo rendimento líquido mensal: "))
+
+    with open(arquivo, "w") as f:
+        f.write(f"Rendimento líquido do mês {mes}: R$ {novo_rendimento:.2f}\n")
+
+    print("Rendimento atualizado com sucesso!")
+3
+def alterar_rendimento():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"rendimentos_{mes}.txt"
+    
+    try:
+        with open(arquivo, "r") as f:
+            linhas = f.readlines()
+            rendimento_atual = float(linhas[0].split("R$ ")[1].strip())
+    except FileNotFoundError:
+        print("Não há rendimentos salvos para este mês.")
+        return
+    except (ValueError, IndexError):
+        print("Arquivo de rendimentos está corrompido. Favor corrigir ou deletar o arquivo.")
+        return
+
+    novo_rendimento = input(f"O rendimento atual é de R$ {rendimento_atual:.2f}. Digite o novo rendimento líquido mensal: ")
+    
+    try:
+        novo_rendimento = float(novo_rendimento)
+    except ValueError:
+        print("Valor digitado inválido. Favor digitar um valor numérico válido.")
+        return
+
+    with open(arquivo, "w") as f:
+        f.write(f"Rendimento líquido do mês {mes}: R$ {novo_rendimento:.2f}\n")
+
+    print("Rendimento atualizado com sucesso!")
+
+def excluir_rendimento():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"rendimentos_{mes}.txt"
+    
+    try:
+        with open(arquivo, "r") as f:
+            linhas = f.readlines()
+            rendimento_atual = float(linhas[0].split("R$ ")[1].strip())
+    except FileNotFoundError:
+        print("Não há rendimentos salvos para este mês.")
+        return
+    except (ValueError, IndexError):
+        print("Arquivo de rendimentos está corrompido. Favor corrigir ou deletar o arquivo.")
+        return
+
+    confirmacao = input(f"Tem certeza que deseja excluir o rendimento líquido mensal de R$ {rendimento_atual:.2f}? (S/N) ").strip().lower()
+    if confirmacao != "s":
+        print("Exclusão cancelada pelo usuário.")
+        return
+
+    os.remove(arquivo)
+
+    print("Rendimento excluído com sucesso!")
+
+
+def excluir_rendimento():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"rendimentos_{mes}.txt"
+    
+    try:
+        with open(arquivo, "r") as f:
+            linhas = f.readlines()
+            rendimento_atual = float(linhas[0].split("R$ ")[1].strip())
+    except FileNotFoundError:
+        print("Não há rendimentos salvos para este mês.")
+        return
+    except (ValueError, IndexError):
+        print("Arquivo de rendimentos está corrompido. Favor corrigir ou deletar o arquivo.")
+        return
+
+    confirmacao = input(f"Tem certeza que deseja excluir o rendimento líquido mensal de R$ {rendimento_atual:.2f}? (S/N) ").strip().lower()
+    if confirmacao != "s":
+        print("Exclusão cancelada pelo usuário.")
+        return
+
+    try:
+        os.remove(arquivo)
+    except FileNotFoundError:
+        print("Não há rendimentos salvos para este mês.")
+        return
+    except Exception as e:
+        print(f"Ocorreu um erro ao excluir o arquivo de rendimentos: {e}")
+        return
+
+    print("Rendimento excluído com sucesso!")
+
+
+
+def listar_rendimentos():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"rendimentos_{mes}.txt"
+    
+    try:
+        with open(arquivo, "r") as f:
+            linhas = f.readlines()
+            rendimento_atual = float(linhas[0].split("R$ ")[1].strip())
+    except FileNotFoundError:
+        print("Não há rendimentos salvos para este mês.")
+        return
+    except (ValueError, IndexError):
+        print("Arquivo de rendimentos está corrompido. Favor corrigir ou deletar o arquivo.")
+        return
+
+    print(f"Lista de rendimentos para o mês de {mes}:")
+    print("-" * 50)
+    print("{:<25} {:<15} {:<10}".format("Descrição", "Mês", "Valor"))
+    print("-" * 50)
+    print("{:<25} {:<15} R$ {:<10.2f}".format("Rendimento líquido mensal", mes, rendimento_atual))
+    print("-" * 50)
+
+
+
+def listar_rendimentos():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"rendimentos_{mes}.txt"
+    
+    try:
+        with open(arquivo, "r") as f:
+            linhas = f.readlines()
+            rendimento_atual = float(linhas[0].split("R$ ")[1].strip())
+            
+            total_rendimentos = rendimento_atual
+            for linha in linhas[1:]:
+                try:
+                    valor = float(linha.split("R$ ")[1].strip())
+                    total_rendimentos += valor
+                except ValueError:
+                    continue
+            
+    except FileNotFoundError:
+        print("Não há rendimentos salvos para este mês.")
+        return
+    except (ValueError, IndexError):
+        print("Arquivo de rendimentos está corrompido. Favor corrigir ou deletar o arquivo.")
+        return
+
+    print(f"Lista de rendimentos para o mês de {mes}:")
+    print("-" * 50)
+    print("{:<25} {:<15} {:<10}".format("Descrição", "Mês", "Valor"))
+    print("-" * 50)
+    print("{:<25} {:<15} R$ {:<10.2f}".format("Rendimento líquido mensal", mes, rendimento_atual))
+    if total_rendimentos != rendimento_atual:
+        print("{:<25} {:<15} R$ {:<10.2f}".format("Total de rendimentos", mes, total_rendimentos))
+    print("-" * 50)
+
+
+def informar_despesa():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"despesas_{mes}.txt"
+    
+    try:
+        valor = float(input("Informe o valor da despesa: R$ "))
+    except ValueError:
+        print("Valor inválido. Tente novamente.")
+        return
+    
+    descricao = input("Informe a descrição da despesa: ")
+    
+    with open(arquivo, "a") as f:
+        f.write(f"{descricao} - R$ {valor:.2f}\n")
+        
+    print(f"Despesa de R$ {valor:.2f} registrada com sucesso para o mês de {mes}.")
+
+
+
+def informar_despesa():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    arquivo = f"despesas_{mes}.txt"
+    
+    while True:
+        try:
+            valor = float(input("Informe o valor da despesa: R$ "))
+            break
+        except ValueError:
+            print("Valor inválido. Tente novamente.")
+    
+    descricao = input("Informe a descrição da despesa: ")
+    
+    try:
+        with open(arquivo, "a") as f:
+            f.write(f"{descricao} - R$ {valor:.2f}\n")
+    except Exception as e:
+        print(f"Erro ao salvar despesa: {e}")
+        return
+    
+    print(f"Despesa de R$ {valor:.2f} registrada com sucesso para o mês de {mes}.")
+
+
+
+def listar_rendimentos():
+    mes = datetime.datetime.now().strftime("%m-%Y")
+    rendimentos = []
+    despesas = []
+    
+   
+    try:
+        with open(f"rendimentos_{mes}.txt", "r") as f:
+            rendimentos = f.readlines()
+    except FileNotFoundError:
+        pass 
+        
+    
+    try:
+        with open(f"despesas_{mes}.txt", "r") as f:
+            despesas = f.readlines()
+    except FileNotFoundError:
+        pass  
+    
+    
+    valores_rendimentos = [float(r.split(" - ")[1].replace("R$ ", "")) for r in rendimentos]
+    
+  
+    valores_despesas = [float(d.split(" - ")[1].replace("R$ ", "")) for d in despesas]
+    
+   
+    saldo = sum(valores_rendimentos) - sum(valores_despesas)
+    
+    
+    if saldo >= 0:
+        print("Rendimentos do mês:\n")
+        for r in sorted(rendimentos):
+            print(r.strip())
+        
+        print(f"\nSaldo do mês: R$ {saldo:.2f}")
+    else:
+        print("Não há saldo disponível para este mês.")
+
+
+
+def excluir_despesa():
+    nome_arquivo = input("Digite o nome do arquivo onde as despesas estão sendo salvas: ")
+    valor_excluir = input("Digite o valor da despesa que deseja excluir: ")
+    
+    try:
+        with open(nome_arquivo, 'r') as arquivo:
+            linhas = arquivo.readlines()
+            
+        with open(nome_arquivo, 'w') as arquivo:
+            for linha in linhas:
+                valores = linha.strip().split(',')
+                if valores[3] != valor_excluir:
+                    arquivo.write(linha)
+        
+        print("Despesa removida com sucesso!")
+        
+    except FileNotFoundError:
+        print("Arquivo não encontrado.")
+        
+    except Exception as e:
+        print("Erro ao excluir despesa:", e)
+
+        def excluir_despesa():
+    mes = input("Digite o mês em que a despesa foi registrada (MM/YYYY): ")
+    try:
+        with open("despesas.txt", "r") as arquivo:
+            linhas = arquivo.readlines()
+        with open("despesas.txt", "w") as arquivo:
+            encontrado = False
+            for linha in linhas:
+                if mes in linha:
+                    encontrado = True
+                    print(linha.strip())
+                    confirmacao = input("Tem certeza que deseja excluir esta despesa? (S/N)").upper()
+                    if confirmacao == "S":
+                        print("Despesa excluída com sucesso.")
+                    else:
+                        arquivo.write(linha)
+                else:
+                    arquivo.write(linha)
+            if not encontrado:
+                print("Não foram encontradas despesas registradas para o mês informado.")
+    except FileNotFoundError:
+        print("Não há registros de despesas.")
+        try:
+    with open("despesas.txt", "r") as arquivo:
+        # ...
+except FileNotFoundError:
+    print("Não há registros de despesas.")
+
+
+import os
+
+def remover_despesa():
+    mes = input("Digite o mês em que a despesa foi registrada (MM/YYYY): ")
+    try:
+        with open("despesas.txt", "r") as arquivo:
+            linhas = arquivo.readlines()
+        with open("despesas.txt", "w") as arquivo:
+            encontrado = False
+            for linha in linhas:
+                if mes in linha:
+                    encontrado = True
+                    print(linha.strip())
+                    print("Despesa removida com sucesso.")
+                else:
+                    arquivo.write(linha)
+            if not encontrado:
+                print("Não foi encontrada nenhuma despesa registrada para o mês especificado.")
+    except FileNotFoundError:
+        print("Arquivo de despesas não encontrado.")
+
+import os
+
+def listar_despesas():
+    
+    if not os.path.exists('despesas.txt'):
+        print('Nenhuma despesa cadastrada.')
+        return
+
+    
+    with open('despesas.txt', 'r') as arquivo:
+       
+        linhas = arquivo.readlines()
+
+   
+    if len(linhas) == 0:
+        print('Nenhuma despesa cadastrada.')
+        return
+
+    
+    linhas.sort(key=lambda x: (int(x.split()[2]), int(x.split()[1])))
+
+   
+    print('--- Despesas ---')
+    total = 0
+    for linha in linhas:
+        descricao, mes, ano, valor = linha.split()
+        print(f'{descricao} - {mes}/{ano} - R$ {valor}')
+        total += float(valor)
+
+    
+    print(f'Total de despesas: R$ {total:.2f}')
+
+
+def listar_despesas():
+    try:
+        with open('despesas.txt', 'r') as file:
+            despesas = []
+            total = 0
+            for line in file:
+                data = line.strip().split(';')
+                despesas.append({'descricao': data[0], 'mes': data[1], 'ano': data[2], 'valor': float(data[3])})
+                total += float(data[3])
+            if len(despesas) == 0:
+                print("Não há despesas registradas.")
+            else:
+                despesas_ordenadas = sorted(despesas, key=lambda k: (k['ano'], k['mes']))
+                for d in despesas_ordenadas:
+                    print(f"Descrição: {d['descricao']}, Mês/Ano: {d['mes']}/{d['ano']}, Valor: R${d['valor']:.2f}")
+                if len(despesas) > 1:
+                    print(f"Total de despesas: R${total:.2f}")
+    except FileNotFoundError:
+        print("Arquivo de despesas não encontrado.")
+
+
+
+def mostrar_resultado():
+   
+    rendimentos = {}
+    despesas = {}
+    for filename in os.listdir("rendimentos"):
+        if filename.endswith(".txt"):
+            with open(os.path.join("rendimentos", filename), "r") as f:
+                rend = float(f.readline())
+                date = datetime.datetime.strptime(filename[:-4], "%m-%Y")
+                rendimentos[date] = rend
+    for filename in os.listdir("despesas"):
+        if filename.endswith(".txt"):
+            with open(os.path.join("despesas", filename), "r") as f:
+                desp = float(f.readline())
+                date = datetime.datetime.strptime(filename[:-4], "%m-%Y")
+                despesas[date] = desp
+
+  
+    resultados = {}
+    for date in sorted(set(rendimentos.keys()) | set(despesas.keys())):
+        rend = rendimentos.get(date, 0)
+        desp = despesas.get(date, 0)
+        saldo = rend - desp
+        resultados[date] = {"receita": rend, "despesa": desp, "saldo": saldo}
+    
+    return resultados
+
+def mostrar_resultado():
+   
+    rendimentos = {}
+    despesas = {}
+    for filename in os.listdir("rendimentos"):
+        if filename.endswith(".txt"):
+            with open(os.path.join("rendimentos", filename), "r") as f:
+                rend = float(f.readline())
+                date = datetime.datetime.strptime(filename[:-4], "%m-%Y")
+                rendimentos[date] = rend
+    for filename in os.listdir("despesas"):
+        if filename.endswith(".txt"):
+            with open(os.path.join("despesas", filename), "r") as f:
+                desp = float(f.readline())
+                date = datetime.datetime.strptime(filename[:-4], "%m-%Y")
+                despesas[date] = desp
+
+   
+    resultados = {}
+    for date in sorted(set(rendimentos.keys()) | set(despesas.keys())):
+        rend = rendimentos.get(date, 0)
+        desp = despesas.get(date, 0)
+        saldo = rend - desp
+        frf = 10000 * (1 + 0.01) ** ((date.year - 2023) * 12 + date.month - 1)
+        meta = 5000
+        resultados[date] = {"receita": rend, "despesa": desp, "saldo":
