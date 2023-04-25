@@ -103,7 +103,7 @@ def alterar_rendimento():
         f.write(f"Rendimento líquido do mês {mes}: R$ {novo_rendimento:.2f}\n")
 
     print("Rendimento atualizado com sucesso!")
-3
+
 def alterar_rendimento():
     mes = datetime.datetime.now().strftime("%m-%Y")
     arquivo = f"rendimentos_{mes}.txt"
